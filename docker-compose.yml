@@ -1,0 +1,48 @@
+version: '2'
+
+services:
+  web:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - db      
+    links:
+      - "db:database"    
+    ports:
+      - "8000:8000"
+    networks:
+      new:
+        aliases:
+          - web
+
+  db:
+    image: postgres:9.4.7
+    volumes: 
+      - ./mydata:/var/lib/postgresql
+    ports:
+      - "32770:5432"
+    networks:
+      new:
+        aliases:
+          - database
+      legacy:
+        aliases:
+          - postgres
+
+  cli_db:
+    image: postgres:9.4.7  
+    volumes_from: 
+      - db
+    env_file:
+      - ./secrets.env
+    ports:
+      - "5432:5432"
+    networks:
+      legacy:
+        aliases:
+          - postgres_cli
+
+networks:
+  new:
+  legacy:
